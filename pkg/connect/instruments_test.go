@@ -7,123 +7,7 @@ import (
 	"testing"
 )
 
-func TestInstrumentsBySymbols(t *testing.T) {
-	// Mock server
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{
-			"data": {
-				"NSE:INFY": {
-					"instrument_token": 408065,
-					"exchange_token": 1594,
-					"tradingsymbol": "INFY",
-					"name": "INFOSYS LTD",
-					"last_price": 1311.65,
-					"expiry": "",
-					"strike": 0,
-					"tick_size": 0.05,
-					"lot_size": 1,
-					"instrument_type": "EQ",
-					"segment": "NSE",
-					"exchange": "NSE"
-				}
-			}
-		}`))
-	}))
-	defer server.Close()
-
-	// Create client with mocked server
-	client := New("test_user")
-	client.SetBaseURI(server.URL)
-
-	symbols := []string{"NSE:INFY"}
-	result, err := client.InstrumentsBySymbols(symbols)
-
-	if err != nil {
-		t.Errorf("InstrumentsBySymbols returned an error: %v", err)
-	}
-
-	expected := map[string]Instrument{
-		"NSE:INFY": {
-			InstrumentToken: 408065,
-			ExchangeToken:   1594,
-			Tradingsymbol:   "INFY",
-			Name:            "INFOSYS LTD",
-			LastPrice:       1311.65,
-			Expiry:          "",
-			Strike:          0,
-			TickSize:        0.05,
-			LotSize:         1,
-			InstrumentType:  "EQ",
-			Segment:         "NSE",
-			Exchange:        "NSE",
-		},
-	}
-
-	if !reflect.DeepEqual(result, expected) {
-		t.Errorf("InstrumentsBySymbols returned %+v, expected %+v", result, expected)
-	}
-}
-
-func TestInstrumentsByTokens(t *testing.T) {
-	// Mock server
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{
-			"data": {
-				"408065": {
-					"instrument_token": 408065,
-					"exchange_token": 1594,
-					"tradingsymbol": "INFY",
-					"name": "INFOSYS LTD",
-					"last_price": 1311.65,
-					"expiry": "",
-					"strike": 0,
-					"tick_size": 0.05,
-					"lot_size": 1,
-					"instrument_type": "EQ",
-					"segment": "NSE",
-					"exchange": "NSE"
-				}
-			}
-		}`))
-	}))
-	defer server.Close()
-
-	// Create client with mocked server
-	client := New("test_user")
-	client.SetBaseURI(server.URL)
-
-	tokens := []uint32{408065}
-	result, err := client.InstrumentsByTokens(tokens)
-
-	if err != nil {
-		t.Errorf("InstrumentsByTokens returned an error: %v", err)
-	}
-
-	expected := map[uint32]Instrument{
-		408065: {
-			InstrumentToken: 408065,
-			ExchangeToken:   1594,
-			Tradingsymbol:   "INFY",
-			Name:            "INFOSYS LTD",
-			LastPrice:       1311.65,
-			Expiry:          "",
-			Strike:          0,
-			TickSize:        0.05,
-			LotSize:         1,
-			InstrumentType:  "EQ",
-			Segment:         "NSE",
-			Exchange:        "NSE",
-		},
-	}
-
-	if !reflect.DeepEqual(result, expected) {
-		t.Errorf("InstrumentsByTokens returned %+v, expected %+v", result, expected)
-	}
-}
-
-func TestInstrumentsByQuery(t *testing.T) {
+func TestInstrumentsQuery(t *testing.T) {
 	// Mock server
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
@@ -156,7 +40,7 @@ func TestInstrumentsByQuery(t *testing.T) {
 		Exchange:      "NSE",
 		Tradingsymbol: "INFY",
 	}
-	result, err := client.InstrumentsByQuery(queryParams)
+	result, err := client.InstrumentsQuery(queryParams)
 
 	if err != nil {
 		t.Errorf("InstrumentsByQuery returned an error: %v", err)

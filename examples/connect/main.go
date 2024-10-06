@@ -42,18 +42,15 @@ func (t *APITest) TestSessionEndpoints() {
 }
 
 func (t *APITest) TestInstrumentsQueryEndpoints() {
-	t.InstrumentsBySymbols()
-	t.InstrumentsByTokens()
-	t.InstrumentsByQuery()
-	t.SymbolsByQuery()
-	t.TokensByQuery()
+	t.InstrumentsInfoBySymbols()
+	t.InstrumentsInfoByTokens()
+	t.InstrumentsQuery()
 	printSectionFooter()
 }
 
 func (t *APITest) TestInstrumentsOCEndpoints() {
 	t.OptionchainInstruments()
-	t.OptionchainSymbols()
-	t.OptionchainTokens()
+	t.OptionchainTokenSymbolMap()
 	printSectionFooter()
 }
 
@@ -199,20 +196,13 @@ func PrettyPrint(title string, data interface{}) {
 			count++
 		}
 
-	case map[string][]mbconnect.Instrument:
-		for k, v := range v {
-			if outerCount > maxOuterCount {
+	case []mbconnect.Instrument:
+		for _, v := range v {
+			if count > maxCount {
 				break
 			}
-			fmt.Printf("  %s:\n", k)
-			for _, model := range v {
-				if count > maxCount {
-					break
-				}
-				prettyPrintJSON(model)
-				count++
-			}
-			outerCount++
+			prettyPrintJSON(v)
+			count++
 		}
 
 	case []mbconnect.Index:

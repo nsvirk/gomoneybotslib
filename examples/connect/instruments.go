@@ -8,16 +8,16 @@ import (
 	mbconnect "github.com/nsvirk/gomoneybotslib/pkg/connect"
 )
 
-func (t *APITest) InstrumentsBySymbols() {
+func (t *APITest) InstrumentsInfoBySymbols() {
 	symbols := strings.Split(t.cfg.TestSymbols, ",")
-	symbolInstruments, err := t.mbClient.InstrumentsBySymbols(symbols)
+	symbolInstruments, err := t.mbClient.InstrumentsInfoBySymbols(symbols)
 	if err != nil {
 		log.Fatalf("Error getting instruments: %v", err)
 	}
 	PrettyPrint("InstrumentsBySymbols", symbolInstruments)
 }
 
-func (t *APITest) InstrumentsByTokens() {
+func (t *APITest) InstrumentsInfoByTokens() {
 	tokensStr := strings.Split(t.cfg.TestTokens, ",")
 	tokens := make([]uint32, len(tokensStr))
 	for i, tokenStr := range tokensStr {
@@ -27,50 +27,24 @@ func (t *APITest) InstrumentsByTokens() {
 		}
 		tokens[i] = uint32(parsedToken)
 	}
-	tokenInstruments, err := t.mbClient.InstrumentsByTokens(tokens)
+	tokenInstruments, err := t.mbClient.InstrumentsInfoByTokens(tokens)
 	if err != nil {
 		log.Fatalf("Error getting instruments: %v", err)
 	}
 	PrettyPrint("InstrumentsByTokens", tokenInstruments)
 }
 
-func (t *APITest) InstrumentsByQuery() {
+func (t *APITest) InstrumentsQuery() {
 	qp := mbconnect.InstrumentsQueryParams{
 		Exchange:       "NFO",
 		Name:           "NIFTY",
 		InstrumentType: "FUT",
 	}
-	symbolInstruments, err := t.mbClient.InstrumentsByQuery(qp)
+	symbolInstruments, err := t.mbClient.InstrumentsQuery(qp)
 	if err != nil {
 		log.Fatalf("Error getting instruments: %v", err)
 	}
 	PrettyPrint("InstrumentsByQuery", symbolInstruments)
-}
-
-func (t *APITest) SymbolsByQuery() {
-	qp := mbconnect.InstrumentsQueryParams{
-		Exchange:       t.cfg.TestQueryExchange,
-		Name:           t.cfg.TestQueryName,
-		InstrumentType: t.cfg.TestQueryInstrumentType,
-	}
-	symbols, err := t.mbClient.SymbolsByQuery(qp)
-	if err != nil {
-		log.Fatalf("Error getting instrument symbols: %v", err)
-	}
-	PrettyPrint("SymbolsByQuery", symbols)
-}
-
-func (t *APITest) TokensByQuery() {
-	qp := mbconnect.InstrumentsQueryParams{
-		Exchange:       t.cfg.TestQueryExchange,
-		Name:           t.cfg.TestQueryName,
-		InstrumentType: t.cfg.TestQueryInstrumentType,
-	}
-	tokens, err := t.mbClient.TokensByQuery(qp)
-	if err != nil {
-		log.Fatalf("Error getting instrument tokens: %v", err)
-	}
-	PrettyPrint("TokensByQuery", tokens)
 }
 
 func (t *APITest) OptionchainInstruments() {
@@ -87,32 +61,18 @@ func (t *APITest) OptionchainInstruments() {
 	PrettyPrint("OptionchainInstruments", ocInstruments)
 }
 
-func (t *APITest) OptionchainSymbols() {
+func (t *APITest) OptionchainTokenSymbolMap() {
 	ocp := mbconnect.OptionChainQueryParams{
 		Exchange:  t.cfg.TestOCExchange,
 		Name:      t.cfg.TestOCName,
 		FutExpiry: t.cfg.TestOCFutExpiry,
 		OptExpiry: t.cfg.TestOCOptExpiry,
 	}
-	ocSymbols, err := t.mbClient.OptionchainSymbols(ocp)
+	ocTokenSymbolMap, err := t.mbClient.OptionchainTokenSymbolMap(ocp)
 	if err != nil {
-		log.Fatalf("Error getting option chain symbols: %v", err)
+		log.Fatalf("Error getting option chain token symbol map: %v", err)
 	}
-	PrettyPrint("OptionchainSymbols", ocSymbols)
-}
-
-func (t *APITest) OptionchainTokens() {
-	ocp := mbconnect.OptionChainQueryParams{
-		Exchange:  t.cfg.TestOCExchange,
-		Name:      t.cfg.TestOCName,
-		FutExpiry: t.cfg.TestOCFutExpiry,
-		OptExpiry: t.cfg.TestOCOptExpiry,
-	}
-	ocTokens, err := t.mbClient.OptionchainTokens(ocp)
-	if err != nil {
-		log.Fatalf("Error getting option chain tokens: %v", err)
-	}
-	PrettyPrint("OptionchainTokens", ocTokens)
+	PrettyPrint("OptionchainTokenSymbolMap", ocTokenSymbolMap)
 }
 
 func (t *APITest) FNOSegmentExpiries() {

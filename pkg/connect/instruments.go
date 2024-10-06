@@ -31,7 +31,6 @@ type InstrumentsQueryParams struct {
 	Strike          float64
 	Segment         string
 	InstrumentType  string
-	key             string
 }
 
 type OptionChainQueryParams struct {
@@ -39,23 +38,21 @@ type OptionChainQueryParams struct {
 	Name      string
 	FutExpiry string
 	OptExpiry string
-	key       string
 }
 
-// InstrumentsBySymbols gets instruments by symbols
-func (c *Client) InstrumentsBySymbols(symbols []string) (map[string]Instrument, error) {
+// InstrumentsInstrumentsInfoBySymbolsBySymbols gets instruments info by symbols
+func (c *Client) InstrumentsInfoBySymbols(symbols []string) (map[string]Instrument, error) {
 	params := url.Values{}
 	for _, symbol := range symbols {
 		params.Add("s", symbol)
 	}
-
 	var symbolInstrumentMap map[string]Instrument
 	err := c.doEnvelope(http.MethodGet, URIInstrumentsInfo, params, nil, &symbolInstrumentMap)
 	return symbolInstrumentMap, err
 }
 
-// InstrumentsByTokens gets instruments by tokens
-func (c *Client) InstrumentsByTokens(tokens []uint32) (map[uint32]Instrument, error) {
+// InstrumentsInfoByTokens gets instruments info by tokens
+func (c *Client) InstrumentsInfoByTokens(tokens []uint32) (map[uint32]Instrument, error) {
 	stringTokens := make([]string, len(tokens))
 	for i, token := range tokens {
 		stringTokens[i] = strconv.FormatUint(uint64(token), 10)
@@ -69,65 +66,12 @@ func (c *Client) InstrumentsByTokens(tokens []uint32) (map[uint32]Instrument, er
 	return tokenInstruments, err
 }
 
-// TokensBySymbols gets tokens by symbols
-func (c *Client) TokensBySymbols(symbols []string) ([]uint32, error) {
-	symbolInstrumentMap, err := c.InstrumentsBySymbols(symbols)
-	if err != nil {
-		return nil, err
-	}
-	var tokens = make([]uint32, 0, len(symbolInstrumentMap))
-	for _, symbolInstrumen := range symbolInstrumentMap {
-		tokens = append(tokens, (symbolInstrumen.InstrumentToken))
-	}
-	return tokens, nil
-}
-
-// SymbolsByTokens gets symbols by tokens
-func (c *Client) SymbolsByTokens(tokens []uint32) ([]string, error) {
-	tokenInstrumentMap, err := c.InstrumentsByTokens(tokens)
-	if err != nil {
-		return nil, err
-	}
-	var symbols = make([]string, 0, len(tokenInstrumentMap))
-	for _, instrument := range tokenInstrumentMap {
-		symbols = append(symbols, (instrument.Exchange + ":" + instrument.Tradingsymbol))
-	}
-	return symbols, nil
-}
-
 // InstrumentsQuery gets instruments by query
-func (c *Client) InstrumentsByQuery(qp InstrumentsQueryParams) (map[string]Instrument, error) {
-	qp.key = ""
+func (c *Client) InstrumentsQuery(qp InstrumentsQueryParams) ([]Instrument, error) {
 	params := makeQueryParams(qp)
-	var instrumentsMap map[string]Instrument
-	err := c.doEnvelope(http.MethodGet, URIInstrumentsQuery, params, nil, &instrumentsMap)
-	return instrumentsMap, err
-}
-
-// SymbolsByQuery gets instrument symbols by query
-func (c *Client) SymbolsByQuery(qp InstrumentsQueryParams) ([]string, error) {
-	qp.key = "symbols"
-	params := makeQueryParams(qp)
-	var symbols []string
-	err := c.doEnvelope(http.MethodGet, URIInstrumentsQuery, params, nil, &symbols)
-	return symbols, err
-}
-
-// TokensByQuery gets instrument tokens by query
-func (c *Client) TokensByQuery(qp InstrumentsQueryParams) ([]uint32, error) {
-	qp.key = "tokens"
-	params := makeQueryParams(qp)
-	var stringTokens []string
-	err := c.doEnvelope(http.MethodGet, URIInstrumentsQuery, params, nil, &stringTokens)
-	var tokens []uint32
-	for _, stringToken := range stringTokens {
-		token, err := strconv.ParseUint(stringToken, 10, 32)
-		if err != nil {
-			return nil, err
-		}
-		tokens = append(tokens, uint32(token))
-	}
-	return tokens, err
+	var instruments []Instrument
+	err := c.doEnvelope(http.MethodGet, URIInstrumentsQuery, params, nil, &instruments)
+	return instruments, err
 }
 
 // makeQueryParams makes query params - helper function
@@ -157,54 +101,31 @@ func makeQueryParams(qp InstrumentsQueryParams) url.Values {
 	if qp.InstrumentType != "" {
 		params.Add("instrument_type", qp.InstrumentType)
 	}
-	if qp.key != "" {
-		params.Add("key", qp.key)
-	}
 	return params
 }
 
 // OptionchainInstruments gets option chain instruments
-func (c *Client) OptionchainInstruments(ocp OptionChainQueryParams) (map[string]Instrument, error) {
-	ocp.key = ""
+func (c *Client) OptionchainInstruments(ocp OptionChainQueryParams) ([]Instrument, error) {
 	params, err := makeOptionChainParams(ocp)
 	if err != nil {
 		return nil, err
 	}
-	var optionChainMap map[string]Instrument
-	err = c.doEnvelope(http.MethodGet, URIInstrumentsOptionchain, params, nil, &optionChainMap)
-	return optionChainMap, err
+	var instruments []Instrument
+	err = c.doEnvelope(http.MethodGet, URIInstrumentsOptionchain, params, nil, &instruments)
+	return instruments, err
 }
 
-// OptionchainSymbols gets option chain symbols
-func (c *Client) OptionchainSymbols(ocp OptionChainQueryParams) ([]string, error) {
-	ocp.key = "symbols"
-	params, err := makeOptionChainParams(ocp)
+// OptionchainTokensMap gets option chain tokens to symbols map
+func (c *Client) OptionchainTokenSymbolMap(ocp OptionChainQueryParams) (map[uint32]string, error) {
+	instruments, err := c.OptionchainInstruments(ocp)
 	if err != nil {
 		return nil, err
 	}
-	var symbols []string
-	err = c.doEnvelope(http.MethodGet, URIInstrumentsOptionchain, params, nil, &symbols)
-	return symbols, err
-}
-
-// OptionchainTokens gets option chain tokens
-func (c *Client) OptionchainTokens(ocp OptionChainQueryParams) ([]uint32, error) {
-	ocp.key = "tokens"
-	params, err := makeOptionChainParams(ocp)
-	if err != nil {
-		return nil, err
+	tokenSymbolMap := make(map[uint32]string)
+	for _, instrument := range instruments {
+		tokenSymbolMap[instrument.InstrumentToken] = instrument.Exchange + ":" + instrument.Tradingsymbol
 	}
-	var stringTokens []string
-	err = c.doEnvelope(http.MethodGet, URIInstrumentsOptionchain, params, nil, &stringTokens)
-	var tokens []uint32
-	for _, stringToken := range stringTokens {
-		token, err := strconv.ParseUint(stringToken, 10, 32)
-		if err != nil {
-			return nil, err
-		}
-		tokens = append(tokens, uint32(token))
-	}
-	return tokens, err
+	return tokenSymbolMap, nil
 }
 
 // makeOptionChainParams makes query params for option chain - helper function
@@ -221,9 +142,6 @@ func makeOptionChainParams(ocp OptionChainQueryParams) (url.Values, error) {
 	}
 	if ocp.OptExpiry != "" {
 		params.Add("opt_expiry", ocp.OptExpiry)
-	}
-	if ocp.key != "" {
-		params.Add("key", ocp.key)
 	}
 	return params, nil
 }
