@@ -24,11 +24,10 @@ type Client struct {
 }
 
 const (
-	name              string        = "mbconnect"
-	version           string        = "4.0.2"
-	requestTimeout    time.Duration = 7000 * time.Millisecond
-	baseURI           string        = "https://api.moneybots.app"
-	kiteHeaderVersion string        = "3"
+	name           string        = "mbconnect"
+	version        string        = "1.0.0"
+	requestTimeout time.Duration = 7000 * time.Millisecond
+	baseURI        string        = "https://api.moneybots.app"
 )
 
 // Useful public constants
@@ -56,8 +55,8 @@ const (
 
 	// indices
 	URIIndicesAll              string = "/indices/all"
-	URIIndicesByExchange       string = "/indices/%s"
-	URIIndicesIndexInstruments string = "/indices/%s/%s"
+	URIIndicesByExchange       string = "/indices/%s/info"
+	URIIndicesIndexInstruments string = "/indices/%s/%s/instruments"
 )
 
 // New creates a new client.
@@ -107,21 +106,7 @@ func (c *Client) doEnvelope(method, uri string, params url.Values, headers http.
 	if params == nil {
 		params = url.Values{}
 	}
-
-	// Send custom headers set
-	if headers == nil {
-		headers = map[string][]string{}
-	}
-
-	// Add Kite Connect version to header
-	headers.Add("X-Kite-Version", kiteHeaderVersion)
-	headers.Add("User-Agent", name+"/"+version)
-
-	if c.enctoken != "" {
-		authHeader := fmt.Sprintf("enctoken %s", c.enctoken)
-		headers.Add("Authorization", authHeader)
-	}
-
+	headers = c.getHeaders(headers)
 	return c.httpClient.DoEnvelope(method, c.baseURI+uri, params, headers, v)
 }
 
@@ -129,34 +114,22 @@ func (c *Client) do(method, uri string, params url.Values, headers http.Header) 
 	if params == nil {
 		params = url.Values{}
 	}
-
-	if headers == nil {
-		headers = map[string][]string{}
-	}
-
-	headers.Add("X-Kite-Version", kiteHeaderVersion)
-	headers.Add("User-Agent", name+"/"+version)
-
-	if c.enctoken != "" {
-		authHeader := fmt.Sprintf("enctoken %s", c.enctoken)
-		headers.Add("Authorization", authHeader)
-	}
-
+	headers = c.getHeaders(headers)
 	return c.httpClient.Do(method, c.baseURI+uri, params, headers)
 }
 
 func (c *Client) doRaw(method, uri string, reqBody []byte, headers http.Header) (HTTPResponse, error) {
+	headers = c.getHeaders(headers)
+	return c.httpClient.DoRaw(method, c.baseURI+uri, reqBody, headers)
+}
+
+func (c *Client) getHeaders(headers http.Header) http.Header {
 	if headers == nil {
 		headers = map[string][]string{}
 	}
-
-	headers.Add("X-Kite-Version", kiteHeaderVersion)
-	headers.Add("User-Agent", name+"/"+version)
-
-	if c.enctoken != "" {
-		authHeader := fmt.Sprintf("enctoken %s", c.enctoken)
-		headers.Add("Authorization", authHeader)
+	headers.Add("User-Agent", fmt.Sprintf("%s/%s", name, version))
+	if c.userId != "" && c.enctoken != "" {
+		headers.Add("Authorization", fmt.Sprintf("%s:%s", c.userId, c.enctoken))
 	}
-
-	return c.httpClient.DoRaw(method, c.baseURI+uri, reqBody, headers)
+	return headers
 }

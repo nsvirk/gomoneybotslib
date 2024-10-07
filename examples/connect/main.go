@@ -28,25 +28,24 @@ func New(cfg *Config) *APITest {
 
 func (t *APITest) TestAPIEndpoints() {
 	// session
-	// t.TestSessionEndpoints()
+	t.TestSessionEndpoints()
 
 	// Generate a session for subsequent tests
 	t.GenerateUserSession()
 
 	// instruments
-	// t.TestInstrumentsQueryEndpoints()
+	t.TestInstrumentsQueryEndpoints()
 	t.TestInstrumentsFNOEndpoints()
-	// t.TestInstrumentsOCEndpoints()
+	t.TestInstrumentsOCEndpoints()
 
 	// indices
-	// t.TestIndicesEndpoints()
+	t.TestIndicesEndpoints()
 }
 
 func (t *APITest) TestSessionEndpoints() {
 	t.GenerateUserSession()
 	t.GenerateTotpValue()
 	t.CheckEnctokenValid()
-	// Uncomment the following line to test session deletion
 	t.DeleteUserSession()
 	printSectionFooter()
 }
@@ -84,7 +83,7 @@ func main() {
 	// Initialize the API test
 	apiTest := New(cfg)
 	// apiTest.mbClient.SetDebug(true)
-	apiTest.mbClient.SetBaseURI(apiTest.cfg.APIDevUrl)
+	// apiTest.mbClient.SetBaseURI(apiTest.cfg.APIDevUrl)
 	apiTest.TestAPIEndpoints()
 
 	printSectionFooter()
