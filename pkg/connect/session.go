@@ -1,7 +1,6 @@
 package mbconnect
 
 import (
-	"fmt"
 	"net/http"
 	"net/url"
 )
@@ -17,56 +16,70 @@ type UserSession struct {
 	LoginTime     string `json:"login_time"`
 }
 
+// -----------------------------------------------------
+// POST /session/token
+// -----------------------------------------------------
 func (c *Client) GenerateUserSession(password, totpSecret string) (*UserSession, error) {
 	totpValue, err := c.GenerateTotpValue(totpSecret)
 	if err != nil {
-		return nil, fmt.Errorf("failed to generate TOTP value: %w", err)
+		return nil, err
 	}
-
 	params := url.Values{
 		"user_id":    {c.userId},
 		"password":   {password},
 		"totp_value": {totpValue},
 	}
-
 	var userSession UserSession
 	if err := c.doEnvelope(http.MethodPost, URISessionLogin, params, nil, &userSession); err != nil {
-		return nil, fmt.Errorf("failed to generate user session: %w", err)
+		return nil, err
 	}
-
 	c.SetEnctoken(userSession.Enctoken)
 	return &userSession, nil
 }
 
+// -----------------------------------------------------
+// POST /session/totp
+// -----------------------------------------------------
 func (c *Client) GenerateTotpValue(totpSecret string) (string, error) {
 	params := url.Values{
 		"user_id":     {c.userId},
 		"totp_secret": {totpSecret},
 	}
-
 	var totpValue string
 	if err := c.doEnvelope(http.MethodPost, URISessionTotp, params, nil, &totpValue); err != nil {
-		return "", fmt.Errorf("failed to generate TOTP value: %w", err)
+		return "", err
 	}
-
 	return totpValue, nil
 }
 
-func (c *Client) DeleteUserSession() (bool, error) {
-	if c.enctoken == "" {
-		return false, fmt.Errorf("no enctoken set, please login first")
-	}
-
+// -----------------------------------------------------
+// DELETE /session/token
+// -----------------------------------------------------
+func (c *Client) DeleteUserSession(userID, enctoken string) (bool, error) {
+	enctoken = url.QueryEscape(enctoken)
 	params := url.Values{
-		"user_id":  {c.userId},
-		"enctoken": {url.QueryEscape(c.enctoken)},
+		"user_id":  {userID},
+		"enctoken": {enctoken},
 	}
-
 	var deleteResponse bool
 	if err := c.doEnvelope(http.MethodDelete, URISessionLogout, params, nil, &deleteResponse); err != nil {
-		return false, fmt.Errorf("failed to delete user session: %w", err)
+		return false, err
 	}
-
 	c.enctoken = ""
 	return deleteResponse, nil
+}
+
+// -----------------------------------------------------
+// POST /session/valid
+// -----------------------------------------------------
+func (c *Client) CheckEnctokenValid(enctoken string) (bool, error) {
+	params := url.Values{
+		"user_id":  {c.userId},
+		"enctoken": {c.enctoken},
+	}
+	var validResponse bool
+	if err := c.doEnvelope(http.MethodPost, URISessionValid, params, nil, &validResponse); err != nil {
+		return false, err
+	}
+	return validResponse, nil
 }

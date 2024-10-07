@@ -8,32 +8,40 @@ import (
 	mbconnect "github.com/nsvirk/gomoneybotslib/pkg/connect"
 )
 
+// -----------------------------------------------------
+// /instruments/info?s=NSE:SBIN&s=BSE:SBIN
+// -----------------------------------------------------
 func (t *APITest) InstrumentsInfoBySymbols() {
-	symbols := strings.Split(t.cfg.TestSymbols, ",")
+	testSymbols := t.cfg.TestSymbols
+	// var symbols []string
+	symbols := strings.Split(testSymbols, ",")
 	symbolInstruments, err := t.mbClient.InstrumentsInfoBySymbols(symbols)
 	if err != nil {
 		log.Fatalf("Error getting instruments: %v", err)
 	}
-	PrettyPrint("InstrumentsBySymbols", symbolInstruments)
+	PrettyPrint("InstrumentsBySymbols", testSymbols, uint32(len(symbolInstruments)), symbolInstruments)
 }
 
+// -----------------------------------------------------
+// /instruments/info?t=256265&t=8961794
+// -----------------------------------------------------
 func (t *APITest) InstrumentsInfoByTokens() {
-	tokensStr := strings.Split(t.cfg.TestTokens, ",")
-	tokens := make([]uint32, len(tokensStr))
-	for i, tokenStr := range tokensStr {
-		parsedToken, err := strconv.ParseUint(tokenStr, 10, 32)
-		if err != nil {
-			log.Fatalf("Error parsing token: %v", err)
-		}
-		tokens[i] = uint32(parsedToken)
+	testTokensStr := t.cfg.TestTokens
+	tokens, err := stringToTokens(testTokensStr)
+	if err != nil {
+		log.Fatalf("Error formatting tokens: %v", err)
 	}
+	// var tokens []uint32
 	tokenInstruments, err := t.mbClient.InstrumentsInfoByTokens(tokens)
 	if err != nil {
 		log.Fatalf("Error getting instruments: %v", err)
 	}
-	PrettyPrint("InstrumentsByTokens", tokenInstruments)
+	PrettyPrint("InstrumentsByTokens", testTokensStr, uint32(len(tokenInstruments)), tokenInstruments)
 }
 
+// -----------------------------------------------------
+// /instruments/query
+// -----------------------------------------------------
 func (t *APITest) InstrumentsQuery() {
 	qp := mbconnect.InstrumentsQueryParams{
 		Exchange:       "NFO",
@@ -44,9 +52,12 @@ func (t *APITest) InstrumentsQuery() {
 	if err != nil {
 		log.Fatalf("Error getting instruments: %v", err)
 	}
-	PrettyPrint("InstrumentsByQuery", symbolInstruments)
+	PrettyPrint("InstrumentsByQuery", qp, uint32(len(symbolInstruments)), symbolInstruments)
 }
 
+// -----------------------------------------------------
+// /instruments/fno/optionchain
+// -----------------------------------------------------
 func (t *APITest) OptionchainInstruments() {
 	ocp := mbconnect.OptionChainQueryParams{
 		Exchange:  t.cfg.TestOCExchange,
@@ -58,7 +69,7 @@ func (t *APITest) OptionchainInstruments() {
 	if err != nil {
 		log.Fatalf("Error getting option chain instruments: %v", err)
 	}
-	PrettyPrint("OptionchainInstruments", ocInstruments)
+	PrettyPrint("OptionchainInstruments", ocp, uint32(len(ocInstruments)), ocInstruments)
 }
 
 func (t *APITest) OptionchainTokenSymbolMap() {
@@ -72,21 +83,44 @@ func (t *APITest) OptionchainTokenSymbolMap() {
 	if err != nil {
 		log.Fatalf("Error getting option chain token symbol map: %v", err)
 	}
-	PrettyPrint("OptionchainTokenSymbolMap", ocTokenSymbolMap)
+	PrettyPrint("OptionchainTokenSymbolMap", ocp, uint32(len(ocTokenSymbolMap)), ocTokenSymbolMap)
 }
 
+// -----------------------------------------------------
+// /instruments/fno/segment_expiries/:name
+// -----------------------------------------------------
 func (t *APITest) FNOSegmentExpiries() {
-	segmentExpiry, err := t.mbClient.FNOSegmentExpiries(t.cfg.TestSegmentName)
+	testSegmentName := t.cfg.TestSegmentName
+	// testSegmentName = ""
+	segmentExpiry, err := t.mbClient.FNOSegmentExpiries(testSegmentName)
 	if err != nil {
 		log.Fatalf("Error getting instruments: %v", err)
 	}
-	PrettyPrint("FNOSegmentExpiries", segmentExpiry)
+	PrettyPrint("FNOSegmentExpiries", testSegmentName, uint32(len(segmentExpiry)), segmentExpiry)
 }
 
+// -----------------------------------------------------
+// /instruments/fno/segment_names/:expiry
+// -----------------------------------------------------
 func (t *APITest) FNOSegmentNames() {
-	segmentName, err := t.mbClient.FNOSegmentNames(t.cfg.TestSegmentExpiry)
+	testSegmentExpiry := t.cfg.TestSegmentExpiry
+	// testSegmentExpiry = ""
+	segmentName, err := t.mbClient.FNOSegmentNames(testSegmentExpiry)
 	if err != nil {
 		log.Fatalf("Error getting instruments: %v", err)
 	}
-	PrettyPrint("FNOSegmentNames", segmentName)
+	PrettyPrint("FNOSegmentNames", testSegmentExpiry, uint32(len(segmentName)), segmentName)
+}
+
+func stringToTokens(testTokensStr string) ([]uint32, error) {
+	tokensStr := strings.Split(testTokensStr, ",")
+	tokens := make([]uint32, len(tokensStr))
+	for i, tokenStr := range tokensStr {
+		parsedToken, err := strconv.ParseUint(tokenStr, 10, 32)
+		if err != nil {
+			return nil, err
+		}
+		tokens[i] = uint32(parsedToken)
+	}
+	return tokens, nil
 }

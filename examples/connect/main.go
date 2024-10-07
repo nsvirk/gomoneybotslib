@@ -9,35 +9,45 @@ import (
 )
 
 type APITest struct {
-	cfg      Config
-	mbClient *mbconnect.Client
+	cfg         *Config
+	mbClient    *mbconnect.Client
+	userSession *mbconnect.UserSession
 }
 
 func New(cfg *Config) *APITest {
 
 	mbClient := mbconnect.New(cfg.KiteUserId)
+	userSession := &mbconnect.UserSession{}
 
 	return &APITest{
-		cfg:      *cfg,
-		mbClient: mbClient,
+		cfg:         cfg,
+		mbClient:    mbClient,
+		userSession: userSession,
 	}
 }
 
 func (t *APITest) TestAPIEndpoints() {
 	// session
-	t.TestSessionEndpoints()
+	// t.TestSessionEndpoints()
+
+	// Generate a session for subsequent tests
+	t.GenerateUserSession()
+
 	// instruments
-	t.TestInstrumentsQueryEndpoints()
+	// t.TestInstrumentsQueryEndpoints()
 	t.TestInstrumentsFNOEndpoints()
-	t.TestInstrumentsOCEndpoints()
-	t.TestIndicesEndpoints()
+	// t.TestInstrumentsOCEndpoints()
+
+	// indices
+	// t.TestIndicesEndpoints()
 }
 
 func (t *APITest) TestSessionEndpoints() {
 	t.GenerateUserSession()
 	t.GenerateTotpValue()
+	t.CheckEnctokenValid()
 	// Uncomment the following line to test session deletion
-	// t.DeleteUserSession()
+	t.DeleteUserSession()
 	printSectionFooter()
 }
 
@@ -45,29 +55,22 @@ func (t *APITest) TestInstrumentsQueryEndpoints() {
 	t.InstrumentsInfoBySymbols()
 	t.InstrumentsInfoByTokens()
 	t.InstrumentsQuery()
-	printSectionFooter()
 }
 
 func (t *APITest) TestInstrumentsOCEndpoints() {
 	t.OptionchainInstruments()
 	t.OptionchainTokenSymbolMap()
-	printSectionFooter()
 }
 
 func (t *APITest) TestInstrumentsFNOEndpoints() {
 	t.FNOSegmentExpiries()
 	t.FNOSegmentNames()
-	printSectionFooter()
 }
 
 func (t *APITest) TestIndicesEndpoints() {
 	t.IndicesAll()
 	t.IndicesByExchange()
-	t.IndexNames()
-	t.IndexTokens()
-	t.IndexSymbols()
 	t.IndexInstruments()
-	printSectionFooter()
 }
 
 func main() {
@@ -81,19 +84,24 @@ func main() {
 	// Initialize the API test
 	apiTest := New(cfg)
 	// apiTest.mbClient.SetDebug(true)
-	// apiTest.mbClient.SetBaseURI(apiTest.cfg.APIDevUrl)
+	apiTest.mbClient.SetBaseURI(apiTest.cfg.APIDevUrl)
 	apiTest.TestAPIEndpoints()
 
+	printSectionFooter()
 }
 
 // --------------------------------------------------------
 // Helper functions
 // --------------------------------------------------------
 
-func PrettyPrint(title string, data interface{}) {
+func PrettyPrint(title string, params interface{}, result uint32, data interface{}) {
 	fmt.Printf("\n===================================\n")
 	fmt.Printf("%s:\n", title)
-	fmt.Printf(" type: %T\n", data)
+	fmt.Printf("-----------------------------------\n")
+	fmt.Printf("  params: %v\n", params)
+	fmt.Printf("  result: %d\n", result)
+	fmt.Printf("-----------------------------------\n")
+	fmt.Printf("  type: %T\n", data)
 	fmt.Printf("-----------------------------------\n")
 
 	count := 0
@@ -116,6 +124,9 @@ func PrettyPrint(title string, data interface{}) {
 
 	case uint32:
 		fmt.Printf("  %d\n", v)
+
+	case bool:
+		fmt.Printf("  %t\n", v)
 
 	case []string:
 		for i, s := range v {

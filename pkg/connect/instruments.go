@@ -40,8 +40,14 @@ type OptionChainQueryParams struct {
 	OptExpiry string
 }
 
-// InstrumentsInstrumentsInfoBySymbolsBySymbols gets instruments info by symbols
+// -----------------------------------------------------
+// POST /instruments/info?s=NSE:NIFTY%2050&s=BSE:SENSEX
+// -----------------------------------------------------
 func (c *Client) InstrumentsInfoBySymbols(symbols []string) (map[string]Instrument, error) {
+	fmt.Println("symbols len", len(symbols))
+	if len(symbols) == 0 {
+		return nil, fmt.Errorf("`symbols` are required")
+	}
 	params := url.Values{}
 	for _, symbol := range symbols {
 		params.Add("s", symbol)
@@ -51,8 +57,13 @@ func (c *Client) InstrumentsInfoBySymbols(symbols []string) (map[string]Instrume
 	return symbolInstrumentMap, err
 }
 
-// InstrumentsInfoByTokens gets instruments info by tokens
+// -----------------------------------------------------
+// GET /instruments/info?t=256265&t=8961794
+// -----------------------------------------------------
 func (c *Client) InstrumentsInfoByTokens(tokens []uint32) (map[uint32]Instrument, error) {
+	if len(tokens) == 0 {
+		return nil, fmt.Errorf("`tokens` are required")
+	}
 	stringTokens := make([]string, len(tokens))
 	for i, token := range tokens {
 		stringTokens[i] = strconv.FormatUint(uint64(token), 10)
@@ -66,7 +77,9 @@ func (c *Client) InstrumentsInfoByTokens(tokens []uint32) (map[uint32]Instrument
 	return tokenInstruments, err
 }
 
-// InstrumentsQuery gets instruments by query
+// -----------------------------------------------------
+// GET /instruments/query?exchange=NSE&tradingsymbol=SBIN
+// -----------------------------------------------------
 func (c *Client) InstrumentsQuery(qp InstrumentsQueryParams) ([]Instrument, error) {
 	params := makeQueryParams(qp)
 	var instruments []Instrument
@@ -104,7 +117,9 @@ func makeQueryParams(qp InstrumentsQueryParams) url.Values {
 	return params
 }
 
-// OptionchainInstruments gets option chain instruments
+// -----------------------------------------------------
+// GET /instruments/optionchain?exchange=NFO&name=NIFTY&opt_expiry=2024-10-10&fut_expiry=2024-10-31
+// -----------------------------------------------------
 func (c *Client) OptionchainInstruments(ocp OptionChainQueryParams) ([]Instrument, error) {
 	params, err := makeOptionChainParams(ocp)
 	if err != nil {
@@ -146,15 +161,25 @@ func makeOptionChainParams(ocp OptionChainQueryParams) (url.Values, error) {
 	return params, nil
 }
 
-// FNOSegmentExpiries gets instruments by FNO segment and name on expiry
+// -----------------------------------------------------
+// GET /instruments/fno/segment_expiries/:name
+// -----------------------------------------------------
 func (c *Client) FNOSegmentExpiries(name string) (map[string][]string, error) {
+	if name == "" {
+		return nil, fmt.Errorf("`name` is required")
+	}
 	var segmentExpiriesMap map[string][]string
 	err := c.doEnvelope(http.MethodGet, fmt.Sprintf(URIInstrumentsFNOSegmentExpiries, name), nil, nil, &segmentExpiriesMap)
 	return segmentExpiriesMap, err
 }
 
-// FNOSegmentNames gets instruments by FNO segment and name on expiry
+// -----------------------------------------------------
+// GET /instruments/fno/segment_expiries/:name
+// -----------------------------------------------------
 func (c *Client) FNOSegmentNames(expiry string) (map[string][]string, error) {
+	if expiry == "" {
+		return nil, fmt.Errorf("`expiry` is required")
+	}
 	var segmentNamesMap map[string][]string
 	err := c.doEnvelope(http.MethodGet, fmt.Sprintf(URIInstrumentsFNOSegmentNames, expiry), nil, nil, &segmentNamesMap)
 	return segmentNamesMap, err

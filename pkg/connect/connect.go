@@ -45,6 +45,7 @@ const (
 	URISessionLogin  string = "/session/token"
 	URISessionLogout string = "/session/token"
 	URISessionTotp   string = "/session/totp"
+	URISessionValid  string = "/session/valid"
 
 	// instruments
 	URIInstrumentsInfo               string = "/instruments/info"
@@ -56,10 +57,7 @@ const (
 	// indices
 	URIIndicesAll              string = "/indices/all"
 	URIIndicesByExchange       string = "/indices/%s"
-	URIIndicesIndexNames       string = "/indices/%s/%s/names"
-	URIIndicesIndexTokens      string = "/indices/%s/%s/tokens"
-	URIIndicesIndexSymbols     string = "/indices/%s/%s/symbols"
-	URIIndicesIndexInstruments string = "/indices/%s/%s/instruments"
+	URIIndicesIndexInstruments string = "/indices/%s/%s"
 )
 
 // New creates a new client.

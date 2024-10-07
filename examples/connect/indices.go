@@ -1,53 +1,45 @@
 package main
 
 import (
+	"fmt"
 	"log"
 )
 
+// -----------------------------------------------------
+// /indices/all
+// -----------------------------------------------------
 func (t *APITest) IndicesAll() {
 	indices, err := t.mbClient.IndicesAll()
 	if err != nil {
 		log.Fatalf("Error getting indices: %v", err)
 	}
-	PrettyPrint("IndicesAll", indices)
+	PrettyPrint("IndicesAll", "", uint32(len(indices)), indices)
 }
 
+// -----------------------------------------------------
+// /indices/:exchange
+// -----------------------------------------------------
 func (t *APITest) IndicesByExchange() {
-	indices, err := t.mbClient.IndicesByExchange(t.cfg.TestIndicesExchange)
+	testIndicesExchange := t.cfg.TestIndicesExchange
+	// testIndicesExchange = ""
+	indices, err := t.mbClient.IndicesByExchange(testIndicesExchange)
 	if err != nil {
 		log.Fatalf("Error getting indices: %v", err)
 	}
-	PrettyPrint("IndicesByExchange", indices)
+	PrettyPrint("IndicesByExchange", testIndicesExchange, uint32(len(indices)), indices)
 }
 
-func (t *APITest) IndexNames() {
-	indices, err := t.mbClient.IndexNames(t.cfg.TestIndicesExchange, t.cfg.TestIndicesName)
-	if err != nil {
-		log.Fatalf("Error getting instruments: %v", err)
-	}
-	PrettyPrint("IndexNames", indices)
-}
-
-func (t *APITest) IndexTokens() {
-	tokens, err := t.mbClient.IndexTokens(t.cfg.TestIndicesExchange, t.cfg.TestIndicesName)
-	if err != nil {
-		log.Fatalf("Error getting instruments: %v", err)
-	}
-	PrettyPrint("IndexTokens", tokens)
-}
-
-func (t *APITest) IndexSymbols() {
-	symbols, err := t.mbClient.IndexSymbols(t.cfg.TestIndicesExchange, t.cfg.TestIndicesName)
-	if err != nil {
-		log.Fatalf("Error getting instruments: %v", err)
-	}
-	PrettyPrint("IndexSymbols", symbols)
-}
-
+// -----------------------------------------------------
+// /indices/:exchange/:name
+// -----------------------------------------------------
 func (t *APITest) IndexInstruments() {
-	instruments, err := t.mbClient.IndexInstruments(t.cfg.TestIndicesExchange, t.cfg.TestIndicesName)
+	testIndicesExchange := t.cfg.TestIndicesExchange
+	testIndicesName := t.cfg.TestIndicesName
+	// testIndicesExchange = ""
+	// testIndicesName = ""
+	instruments, err := t.mbClient.IndexInstruments(testIndicesExchange, testIndicesName)
 	if err != nil {
-		log.Fatalf("Error getting instruments: %v", err)
+		log.Fatalf("Error getting index instruments: %v", err)
 	}
-	PrettyPrint("IndexInstruments", instruments)
+	PrettyPrint("IndexInstruments", fmt.Sprintf("%s %s", testIndicesExchange, testIndicesName), uint32(len(instruments)), instruments)
 }
