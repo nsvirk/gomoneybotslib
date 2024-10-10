@@ -56,37 +56,6 @@ func (t *APITest) InstrumentsQuery() {
 }
 
 // -----------------------------------------------------
-// /instruments/fno/optionchain
-// -----------------------------------------------------
-func (t *APITest) OptionchainInstruments() {
-	ocp := mbconnect.OptionChainQueryParams{
-		Exchange:  t.cfg.TestOCExchange,
-		Name:      t.cfg.TestOCName,
-		FutExpiry: t.cfg.TestOCFutExpiry,
-		OptExpiry: t.cfg.TestOCOptExpiry,
-	}
-	ocInstruments, err := t.mbClient.OptionchainInstruments(ocp)
-	if err != nil {
-		log.Fatalf("Error getting option chain instruments: %v", err)
-	}
-	PrettyPrint("OptionchainInstruments", ocp, uint32(len(ocInstruments)), ocInstruments)
-}
-
-func (t *APITest) OptionchainTokenSymbolMap() {
-	ocp := mbconnect.OptionChainQueryParams{
-		Exchange:  t.cfg.TestOCExchange,
-		Name:      t.cfg.TestOCName,
-		FutExpiry: t.cfg.TestOCFutExpiry,
-		OptExpiry: t.cfg.TestOCOptExpiry,
-	}
-	ocTokenSymbolMap, err := t.mbClient.OptionchainTokenSymbolMap(ocp)
-	if err != nil {
-		log.Fatalf("Error getting option chain token symbol map: %v", err)
-	}
-	PrettyPrint("OptionchainTokenSymbolMap", ocp, uint32(len(ocTokenSymbolMap)), ocTokenSymbolMap)
-}
-
-// -----------------------------------------------------
 // /instruments/fno/segment_expiries/:name
 // -----------------------------------------------------
 func (t *APITest) FNOSegmentExpiries() {

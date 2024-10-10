@@ -36,7 +36,6 @@ func (t *APITest) TestAPIEndpoints() {
 	// instruments
 	t.TestInstrumentsQueryEndpoints()
 	t.TestInstrumentsFNOEndpoints()
-	t.TestInstrumentsOCEndpoints()
 
 	// indices
 	t.TestIndicesEndpoints()
@@ -54,11 +53,6 @@ func (t *APITest) TestInstrumentsQueryEndpoints() {
 	t.InstrumentsInfoBySymbols()
 	t.InstrumentsInfoByTokens()
 	t.InstrumentsQuery()
-}
-
-func (t *APITest) TestInstrumentsOCEndpoints() {
-	t.OptionchainInstruments()
-	t.OptionchainTokenSymbolMap()
 }
 
 func (t *APITest) TestInstrumentsFNOEndpoints() {

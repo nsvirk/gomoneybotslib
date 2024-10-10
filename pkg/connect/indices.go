@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+// Index is a struct that represents an index
 type Index struct {
 	ID            uint32    `json:"-"`
 	Index         string    `json:"index"`
@@ -18,10 +19,7 @@ type Index struct {
 	UpdatedAt     time.Time `json:"-"`
 }
 
-// -----------------------------------------------------
-// /indices/all
-// -----------------------------------------------------
-// IndicesAll returns all the indices
+// GET /indices/all - Get all indices info `exchange` wise
 func (c *Client) IndicesAll() (map[string][]Index, error) {
 	var index = make(map[string][]Index)
 	if err := c.doEnvelope(http.MethodGet, URIIndicesAll, nil, nil, &index); err != nil {
@@ -30,10 +28,7 @@ func (c *Client) IndicesAll() (map[string][]Index, error) {
 	return index, nil
 }
 
-// -----------------------------------------------------
-// /indices/:exchange
-// -----------------------------------------------------
-// IndicesByExchange returns the indices for a given exchange
+// GET /indices/:exchange/info - Get indices info by `exchange`
 func (c *Client) IndicesByExchange(exchange string) ([]Index, error) {
 	if exchange == "" {
 		return nil, fmt.Errorf("`exchange` is required")
@@ -45,10 +40,7 @@ func (c *Client) IndicesByExchange(exchange string) ([]Index, error) {
 	return indices, nil
 }
 
-// -----------------------------------------------------
-// /indices/:exchange/:name
-// -----------------------------------------------------
-// IndexInstruments returns the instruments of the indices for a Index name
+// GET /indices/:exchange/:name/instruments - Get instruments of the indices by `exchange` and `name`
 func (c *Client) IndexInstruments(exchange, name string) ([]Index, error) {
 	if exchange == "" {
 		return nil, fmt.Errorf("`exchange` is required")

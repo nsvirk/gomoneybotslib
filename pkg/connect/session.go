@@ -5,6 +5,7 @@ import (
 	"net/url"
 )
 
+// UserSession is a struct that represents a user session
 type UserSession struct {
 	UserID        string `json:"user_id"`
 	UserName      string `json:"user_name"`
@@ -16,9 +17,7 @@ type UserSession struct {
 	LoginTime     string `json:"login_time"`
 }
 
-// -----------------------------------------------------
-// POST /session/token
-// -----------------------------------------------------
+// POST /session/token - Generate a user session
 func (c *Client) GenerateUserSession(password, totpSecret string) (*UserSession, error) {
 	totpValue, err := c.GenerateTotpValue(totpSecret)
 	if err != nil {
@@ -37,9 +36,7 @@ func (c *Client) GenerateUserSession(password, totpSecret string) (*UserSession,
 	return &userSession, nil
 }
 
-// -----------------------------------------------------
-// POST /session/totp
-// -----------------------------------------------------
+// POST /session/totp - Generate a totp value
 func (c *Client) GenerateTotpValue(totpSecret string) (string, error) {
 	params := url.Values{
 		"user_id":     {c.userId},
@@ -52,9 +49,7 @@ func (c *Client) GenerateTotpValue(totpSecret string) (string, error) {
 	return totpValue, nil
 }
 
-// -----------------------------------------------------
-// DELETE /session/token
-// -----------------------------------------------------
+// DELETE /session/token - Delete a user session
 func (c *Client) DeleteUserSession(userID, enctoken string) (bool, error) {
 	enctoken = url.QueryEscape(enctoken)
 	params := url.Values{
@@ -69,9 +64,7 @@ func (c *Client) DeleteUserSession(userID, enctoken string) (bool, error) {
 	return deleteResponse, nil
 }
 
-// -----------------------------------------------------
-// POST /session/valid
-// -----------------------------------------------------
+// POST /session/valid - Check if the `enctoken` is valid
 func (c *Client) CheckEnctokenValid(enctoken string) (bool, error) {
 	params := url.Values{
 		"user_id":  {c.userId},
