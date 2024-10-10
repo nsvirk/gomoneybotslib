@@ -20,10 +20,6 @@ type Config struct {
 	TestQueryExchange       string `env:"TEST_QUERY_EXCHANGE"`
 	TestQueryName           string `env:"TEST_QUERY_NAME"`
 	TestQueryInstrumentType string `env:"TEST_QUERY_INSTRUMENT_TYPE"`
-	TestOCExchange          string `env:"TEST_OC_EXCHANGE"`
-	TestOCName              string `env:"TEST_OC_NAME"`
-	TestOCFutExpiry         string `env:"TEST_OC_FUT_EXPIRY"`
-	TestOCOptExpiry         string `env:"TEST_OC_OPT_EXPIRY"`
 	TestSegmentName         string `env:"TEST_SEGMENT_NAME"`
 	TestSegmentExpiry       string `env:"TEST_SEGMENT_EXPIRY"`
 	TestIndicesExchange     string `env:"TEST_INDICES_EXCHANGE"`
